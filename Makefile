@@ -18,3 +18,7 @@ add:
 
 sub:
 	gcc --std=c11 -g Testing/SubtractTest.c -o SubtractTest
+
+
+uint_t:
+	g++ --std=c++17 Testing/uint_t.cpp -o uint_t
