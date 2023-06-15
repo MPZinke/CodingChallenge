@@ -14,3 +14,7 @@ multiply:
 
 add:
 	gcc --std=c11 -g Testing/AddTest.c -o AddTest
+
+
+sub:
+	gcc --std=c11 -g Testing/SubtractTest.c -o SubtractTest

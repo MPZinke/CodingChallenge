@@ -68,7 +68,20 @@ uint240_t abs_sub(uint240_t a, uint240_t b)
 /*
 FROM: https://github.com/python/cpython/blob/d32e8d6070057eb7ad0eb2f9d9f1efab38b2cff4/Objects/longobject.c#L3386
 */
-{}
+{
+	uint240_t result = new_uint240_t_equaling_0();
+	uint64_t borrow = 0;
+
+	uint8_t x;
+	for(x = 0; x < DIGIT_COUNT; x++)
+	{
+		borrow = a.digits[x] - b.digits[x] - borrow;
+		result.digits[x] = borrow & DIGIT_MASK;
+		borrow = borrow >> DIGIT_SHIFT;
+		borrow = borrow & 1;
+	}
+
+	return result;}
 
 
 uint240_t abs_mul(uint240_t a, uint240_t b)
@@ -106,6 +119,15 @@ FROM: https://github.com/python/cpython/blob/d32e8d6070057eb7ad0eb2f9d9f1efab38b
 	}
 
 	return result;
+}
+
+
+uint240_t abs_div(uint240_t a, uint240_t b)
+/*
+FROM: https://github.com/python/cpython/blob/10bf2cd404320252ef162d5699cb7ce52a970d44/Objects/longobject.c#L2947
+*/
+{
+
 }
 
 

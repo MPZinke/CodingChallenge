@@ -43,20 +43,21 @@ void print(uint20_t value)
 }
 
 
-uint20_t abs_add(uint20_t a, uint20_t b)
+uint20_t abs_sub(uint20_t a, uint20_t b)
 /*
-FROM: https://github.com/python/cpython/blob/d32e8d6070057eb7ad0eb2f9d9f1efab38b2cff4/Objects/longobject.c#L3352
+FROM: https://github.com/python/cpython/blob/12b6d844d8819955508bd86db106f17516be3f77/Objects/longobject.c#L3421
 */
 {
 	uint20_t result = new_uint20_t(0, 0);
-	uint64_t carry = 0;
+	uint64_t borrow = 0;
 
 	uint8_t x;
 	for(x = 0; x < DIGIT_COUNT; x++)
 	{
-		carry += a.digits[x] + b.digits[x];
-		result.digits[x] = carry & DIGIT_MASK;
-		carry = carry >> DIGIT_SHIFT;
+		borrow = a.digits[x] - b.digits[x] - borrow;
+		result.digits[x] = borrow & DIGIT_MASK;
+		borrow = borrow >> DIGIT_SHIFT;
+		borrow = borrow & 1;
 	}
 
 	return result;
@@ -65,10 +66,11 @@ FROM: https://github.com/python/cpython/blob/d32e8d6070057eb7ad0eb2f9d9f1efab38b
 
 int main()
 {
-	uint20_t a = new_uint20_t(63, 61);
-	uint20_t b = new_uint20_t(2, 0);
+	// uint20_t a = new_uint20_t(63, 61);
+	uint20_t a = new_uint20_t(5, 0);
+	uint20_t b = new_uint20_t(63, 0);
 
-	uint20_t result = abs_add(a, b);
+	uint20_t result = abs_sub(a, b);
 
 	print(a);
 	printf("\n");
