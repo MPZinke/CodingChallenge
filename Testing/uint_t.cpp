@@ -11,7 +11,7 @@
 
 #define input_t uint64_t
 #define input_t_size sizeof(uint64_t)
-#define input_t_bits (input_t_size * 8)
+#define INPUT_T_BITS (input_t_size * 8)
 #define digit_t uint32_t
 #define digit_t_size sizeof(digit_t)
 #define digit_t_bits (digit_t_size * 8)
@@ -46,7 +46,7 @@ class uint_t
 
 uint_t::uint_t(input_t initial_value)
 {
-	uint8_t limit = (input_t_bits / DIGIT_SHIFT) + (uint8_t)(input_t_bits % DIGIT_SHIFT);
+	uint8_t limit = (INPUT_T_BITS / DIGIT_SHIFT) + (uint8_t)(INPUT_T_BITS % DIGIT_SHIFT);
 	for(uint8_t x = 0; x < limit; x++)
 	{
 		if((initial_value >> DIGIT_SHIFT) != 0)
@@ -63,65 +63,42 @@ uint_t::uint_t(input_t initial_value)
 }
 
 
-uint_t::uint_t(uint16_t bits, digit_t initial_value)
-: _bits{bits}, _size{static_cast<uint8_t>(bits / DIGIT_SHIFT + (uint8_t)((bits % DIGIT_SHIFT) != 0))}
+uint_t::uint_t(uint16_t count, ...)
+/*
+
+*/
+// Zero initialization from: https://stackoverflow.com/a/2204380
+: _digits{new digit_t[_size]()} _size{static_cast<uint8_t>(((INPUT_T_BITS * count) + DIGIT_SHIFT - 1) / DIGIT_SHIFT)}
 {
-	_digits = new digit_t[_size];
-	std::cout << "Initial value: " << initial_value << "\n";
-	_digits[0] = initial_value;
-	std::cout << "Digits[0]: " << _digits[0] << "\n";
-	assert((_digits[0] >> DIGIT_SHIFT) == 0);  // Don't let me accidentally lost information
-
-	for(uint8_t x = 1; x < _size; x++)
-	{
-		_digits[x] = 0;
-	}
-}
-
-
-uint_t::uint_t(uint16_t bits, ...)
-: _bits{bits}, _size{static_cast<uint8_t>(bits / DIGIT_SHIFT + (uint8_t)((bits % DIGIT_SHIFT) != 0))}
-{
-	_digits = new digit_t[_size];
-	for(uint8_t x = 0; x < _size; x++)
-	{
-		_digits[x] = 0;
-	}
-
 	va_list variable_list;
-	va_start(variable_list, _bits / input_t_bits + _bits % input_t_bits);
+	va_start(variable_list, count);
 
-	uint64_t carry = 0;
-
-	for(int written_bits = 0; written_bits < ???; written_bits += input_t_bits)
+	for(int ints_read = 0, bits_read = 0; ints_read < count; ints_read++)
 	{
 		uint64_t next_value = va_arg(variable_list, input_t);
-		int remaining_bits = input_t_bits;
-		// For x in range(ceil(input_t_bits/ DIGIT_SHIFT))
-		for(int x = 0; x < ((input_t_bits + DIGIT_SHIFT - 1) / DIGIT_SHIFT); x++)
+
+		int digit_remainder = DIGIT_SHIFT - (bits_read % DIGIT_SHIFT);
+		int int_remainder = INPUT_T_BITS - (bits_read % INPUT_T_BITS);
+
+		// Determine number of "pigeon holes" input goes into based on remainder of digit
+		int iterations = (INPUT_T_BITS / DIGIT_SHIFT) + (int)(digit_remainder < (INPUT_T_BITS % DIGIT_SHIFT))
+		  + (int)((INPUT_T_BITS % DIGIT_SHIFT) != 0);
+
+		for(uint8_t x = 0; x < iterations; x++)
 		{
-			int last_written_bit = written_bits % DIGIT_SHIFT;
-			int last_read_bit = remaining_bits;
-			int number_of_bits_to_read_from_input_and_write_to_digit = DIGIT_SHIFT - last_written_bit;
-			int digit_index = written_bits / DIGIT_SHIFT;
-			_digits[digit_index] |= next_value >> (???)
-			remaining_bits -= number_of_bits_to_read_from_input_and_write_to_digit;
+			int bits_to_read = digit_remainder < int_remainder ? digit_remainder : int_remainder;
+
+			int digit_index = bits_read / DIGIT_SHIFT;
+			int digit_offset = bits_read % DIGIT_SHIFT;
+
+			int int_offset = bits_read % INPUT_T_BITS;
+			// TODO: shift int bits to match digit place and mask
+			uint64_t mask = (1 << bits_to_read) - 1;
+
+			bits_read += bits_to_read;
+			digit_remainder = DIGIT_SHIFT - (bits_read % DIGIT_SHIFT)
+			int_remainder = INPUT_T_BITS - (bits_read % INPUT_T_BITS)
 		}
-	}
-
-
-	for(int bits_read = 0; bits_read < ((bits + input_t_bits - 1) / input_t_bits); bits_read += input_t_bits)
-	{
-		
-		for(int bits_written = 0; bits_written < )
-	}
-
-
-	for(uint8_t x = 0; x < _size; x++)
-	{
-		uint64_t value = 
-		_digits[x] = va_arg(variable_list, digit_t);
-		assert((_digits[x] >> DIGIT_SHIFT) == 0);  // Don't let me accidentally lost information
 	}
 }
 
