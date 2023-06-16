@@ -21,4 +21,4 @@ sub:
 
 
 uint_t:
-	g++ --std=c++17 Testing/uint_t.cpp -o uint_t
+	g++ --std=c++17 Testing/uint_t.cpp -o Uint_tTest
