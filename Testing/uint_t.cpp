@@ -10,44 +10,46 @@
 #define DIGIT_MASK (((uint64_t)1 << DIGIT_SHIFT) - 1)
 
 #define input_t uint64_t
-#define input_t_size sizeof(uint64_t)
-#define INPUT_T_BITS (input_t_size * 8)
+#define INPUT_T_SIZE sizeof(uint64_t)
+#define INPUT_T_BITS (INPUT_T_SIZE * 8)
 #define digit_t uint32_t
-#define digit_t_size sizeof(digit_t)
-#define digit_t_bits (digit_t_size * 8)
+#define DIGIT_T_SIZE sizeof(digit_t)
+#define DIGIT_T_BITS (DIGIT_T_SIZE * 8)
 
 
-static_assert(DIGIT_SHIFT < (digit_t_size * 8), "'DIGIT_SHIFT' must be less than the number of bits in 'digit_t_size'");
+static_assert(DIGIT_SHIFT < DIGIT_T_BITS, "'DIGIT_SHIFT' must be less than the number of bits in 'DIGIT_T_SIZE'");
+static_assert(INPUT_T_BITS >= DIGIT_T_BITS, "'INPUT_T_BITS' must be greater than or equal to 'DIGIT_T_BITS'");
 
 
 class uint_t
 {
 	public:
-		uint_t(uint64_t initial_value);
-		uint_t(uint16_t bits, ...);
+		uint_t(uint64_t initial_value=0);
+		uint_t(uint16_t bits, input_t initial_value1, input_t initial_value2, ...);
 		~uint_t();
 		uint_t(const uint_t& object);
 
 		void resize(int additional_size=1);
+		void size(uint8_t new_size);
 
 		uint_t operator=(uint_t& right);
-		uint_t operator+(uint32_t right);
+		uint_t operator+(input_t right);
+		uint_t operator+=(input_t right);
 		friend uint_t operator+(uint_t& left, uint_t& right);
+		friend uint_t& operator+=(uint_t& left, uint_t& right);
 		friend std::ostream& operator<<(std::ostream& stream, uint_t& value);
 
 	private:
 		digit_t* _digits;
-		uint16_t _bits;  // number of bits
-		uint8_t _size;  // number of digits
+		uint8_t _size = 1;  // number of digits
 };
 
 
 // —————————————————————————————————————————————————— CONSTRUCTORS —————————————————————————————————————————————————— //
 
-uint_t::uint_t(input_t initial_value)
+uint_t::uint_t(input_t initial_value/*=0*/)
 {
-	uint8_t limit = (INPUT_T_BITS / DIGIT_SHIFT) + (uint8_t)(INPUT_T_BITS % DIGIT_SHIFT);
-	for(uint8_t x = 0; x < limit; x++)
+	for(uint8_t x = 1; x < (INPUT_T_BITS + DIGIT_SHIFT - 1) / DIGIT_SHIFT; x++)
 	{
 		if((initial_value >> DIGIT_SHIFT) != 0)
 		{
@@ -63,42 +65,40 @@ uint_t::uint_t(input_t initial_value)
 }
 
 
-uint_t::uint_t(uint16_t count, ...)
+uint_t::uint_t(uint16_t count, input_t initial_value1, input_t initial_value2, ...)
 /*
 
 */
-// Zero initialization from: https://stackoverflow.com/a/2204380
-: _digits{new digit_t[_size]()} _size{static_cast<uint8_t>(((INPUT_T_BITS * count) + DIGIT_SHIFT - 1) / DIGIT_SHIFT)}
+: _digits{nullptr}, _size{static_cast<uint8_t>(((INPUT_T_BITS * count) + DIGIT_SHIFT - 1) / DIGIT_SHIFT)}
 {
+	_digits = new digit_t[_size]();  // Zero initialization from: https://stackoverflow.com/a/2204380
+
 	va_list variable_list;
-	va_start(variable_list, count);
+	va_start(variable_list, "");
 
-	for(int ints_read = 0, bits_read = 0; ints_read < count; ints_read++)
+	std::vector<input_t> inputs = {initial_value1, initial_value2};
+	for(uint8_t x = 2; x < count; x++)
 	{
-		uint64_t next_value = va_arg(variable_list, input_t);
+		inputs.push_back(va_arg(variable_list, input_t));
+	}
 
-		int digit_remainder = DIGIT_SHIFT - (bits_read % DIGIT_SHIFT);
-		int int_remainder = INPUT_T_BITS - (bits_read % INPUT_T_BITS);
+	for(uint16_t bits_read = 0, x = 0; bits_read < INPUT_T_BITS * count && x < INPUT_T_BITS * count; x++)
+	{
+		int digit_index = bits_read / DIGIT_SHIFT;
+		int digit_offset = bits_read % DIGIT_SHIFT;
+		int input_index = bits_read / INPUT_T_BITS;
+		int input_offset = bits_read % INPUT_T_BITS;
 
-		// Determine number of "pigeon holes" input goes into based on remainder of digit
-		int iterations = (INPUT_T_BITS / DIGIT_SHIFT) + (int)(digit_remainder < (INPUT_T_BITS % DIGIT_SHIFT))
-		  + (int)((INPUT_T_BITS % DIGIT_SHIFT) != 0);
+		int digit_remainder = DIGIT_SHIFT - digit_offset;
+		int input_remainder = INPUT_T_BITS - input_offset;
 
-		for(uint8_t x = 0; x < iterations; x++)
-		{
-			int bits_to_read = digit_remainder < int_remainder ? digit_remainder : int_remainder;
+		input_t number_of_bits_to_read = digit_remainder < input_remainder ? digit_remainder : input_remainder;
+		input_t mask = ((1 << number_of_bits_to_read) - 1);
+		input_t input_bits = (inputs[input_index] >> input_offset) & mask;
+		input_t digit_bits = input_bits << digit_offset;
+		_digits[digit_index] |= digit_bits;
 
-			int digit_index = bits_read / DIGIT_SHIFT;
-			int digit_offset = bits_read % DIGIT_SHIFT;
-
-			int int_offset = bits_read % INPUT_T_BITS;
-			// TODO: shift int bits to match digit place and mask
-			uint64_t mask = (1 << bits_to_read) - 1;
-
-			bits_read += bits_to_read;
-			digit_remainder = DIGIT_SHIFT - (bits_read % DIGIT_SHIFT)
-			int_remainder = INPUT_T_BITS - (bits_read % INPUT_T_BITS)
-		}
+		bits_read += number_of_bits_to_read;
 	}
 }
 
@@ -107,7 +107,7 @@ uint_t::uint_t(const uint_t& object)
 /*
 SUMMARY: Copy Constructor.
 */
-: _bits{object._bits}, _size{object._size}
+: _size{object._size}
 {
 	_digits = new digit_t[_size];
 	for(uint8_t x = 0; x < _size; x++)
@@ -140,7 +140,12 @@ void uint_t::resize(int additional_size/*=1*/)
 	delete[] _digits;
 	_digits = temp;
 	_size = (uint8_t)new_size;
-	_bits = (uint16_t)DIGIT_SHIFT * (uint16_t)_size;
+}
+
+
+void uint_t::size(uint8_t new_size)
+{
+	resize((int)new_size - (int)_size);
 }
 
 
@@ -148,48 +153,26 @@ void uint_t::resize(int additional_size/*=1*/)
 
 uint_t uint_t::operator=(uint_t& right)
 {
-	assert(_size >= right._size);
+	_size = right._size;
+
+	delete[] _digits;
+	_digits = new digit_t[right._size];
 
 	uint8_t x;
-	for(x = 0; x < right._size; x++)
+	for(uint8_t x = 0; x < _size; x++)
 	{
 		_digits[x] = right._digits[x];
-	}
-	for(; x < _size; x++)
-	{
-		_digits[x] = 0;
 	}
 
 	return *this;
 }
 
 
-uint_t uint_t::operator+(uint32_t right)
+uint_t uint_t::operator+(input_t right)
 {
-	if((right >> DIGIT_SHIFT) == 0)
-	{
-		uint_t right_uint_t(30, right);
-		return *this + right_uint_t;
-	}
-	else
-	{
-		uint_t right_uint_t(32, right & DIGIT_MASK, right >> DIGIT_SHIFT);
-		return *this + right_uint_t;
-	}
+	uint_t right_uint_t(right);
+	return *this += right_uint_t;
 }
-
-
-// uint_t uint_t::operator+=(uint32_t right)
-// {
-// 	if((right >> DIGIT_SHIFT) == 0)
-// 	{
-// 		uint_t result(30, )
-// 	}
-// 	else
-// 	{
-// 		return *this + uint_t(32, right & DIGIT_MASK, right >> DIGIT_SHIFT);
-// 	}
-// }
 
 
 uint_t operator+(uint_t& left, uint_t& right)
@@ -197,7 +180,8 @@ uint_t operator+(uint_t& left, uint_t& right)
 	uint_t& a = left._size > right._size ? left : right;
 	uint_t& b = left._size > right._size ? right : left;
 
-	uint_t result(a._size, 0);
+	uint_t result;
+	result.size(a._size);
 	uint64_t carry = 0;
 
 	uint8_t x;
@@ -207,7 +191,7 @@ uint_t operator+(uint_t& left, uint_t& right)
 		result._digits[x] = carry & DIGIT_MASK;
 		carry = carry >> DIGIT_SHIFT;
 	}
-	for(x = 0; x < a._size; x++)
+	for(; x < a._size; x++)
 	{
 		carry += a._digits[x];
 		result._digits[x] = carry & DIGIT_MASK;
@@ -216,8 +200,7 @@ uint_t operator+(uint_t& left, uint_t& right)
 
 	if(carry != 0)
 	{
-		// Resize for carry
-		result.resize();
+		result.resize(1);
 		result._digits[x] = carry;
 	}
 
@@ -225,9 +208,52 @@ uint_t operator+(uint_t& left, uint_t& right)
 }
 
 
+uint_t& operator+=(uint_t& left, input_t right)
+{
+	uint_t right_uint_t(right);
+	return left += right_uint_t;
+}
+
+
+uint_t& operator+=(uint_t& left, uint_t& right)
+{
+	uint_t& a = left._size > right._size ? left : right;
+	uint_t& b = left._size > right._size ? right : left;
+
+
+	digit_t* temp = new digit_t[a._size]();
+	uint64_t carry = 0;
+
+	uint8_t x;
+	for(x = 0; x < b._size; x++)
+	{
+		carry += a._digits[x] + b._digits[x];
+		temp[x] = carry & DIGIT_MASK;
+		carry = carry >> DIGIT_SHIFT;
+	}
+	for(; x < a._size; x++)
+	{
+		carry += a._digits[x];
+		temp[x] = carry & DIGIT_MASK;
+		carry = carry >> DIGIT_SHIFT;
+	}
+
+	delete[] left._digits;
+	left._digits = temp;
+
+	if(carry != 0)
+	{
+		left.resize(1);
+		left._digits[x] = carry;
+	}
+
+	return left;
+}
+
+
 std::ostream& operator<<(std::ostream& stream, uint_t& value)
 {
-	char* base10_digits = new char[value._bits / 3];
+	// char* base10_digits = new char[value._bits / 3];
 	// digit_t current_base = 0;
 
 	// uint8_t x;
@@ -247,6 +273,7 @@ std::ostream& operator<<(std::ostream& stream, uint_t& value)
 		}
 		stream << " ";
 	}
+	// stream << (int)value._size << std::endl;
 	stream << std::endl;
 	return stream;
 }
@@ -260,15 +287,31 @@ uint_t::~uint_t()
 
 int main()
 {
-	std::cout << "Hello\n";
-	uint_t a(120, 14);
-	std::cout << a;
+	// uint_t + uint_t
+	uint_t a(0b111111111111111111111111111111);
+	std::cout << "a: " << a;
+	uint_t b(1);
+	std::cout << "b: " << b;
+	uint_t c = a + b;
+	std::cout << "a: " << a;
+	std::cout << "c: " << c;
 
-	uint_t b = a + 2;
-	std::cout << b;
+	// uint_t + uint64_t
+	uint_t d = c + 16;
+	std::cout << "d: " << d;
 
-	uint_t c()
-	std::cout
+	// uint_t += uint_t
+	uint_t e(0b1111111111111111111111111111111111111111111111111111111111111111);
+	std::cout << "e: " << e;
+	e += b;
+	std::cout << "e: " << e;
+
+	e = b;
+	std::cout << "e: " << e;
+
+	// uint_t += uint64_t
+	// uint_t() + uint_t 
+	// uint_t() + uint_t() 
 
 	return 0;
 }
