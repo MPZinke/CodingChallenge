@@ -4,4 +4,4 @@ AddTest
 MathChecker
 MultiplyTest
 SubtractTest
-uint_t
+Uint_tTest

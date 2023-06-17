@@ -1,53 +1,11 @@
 
 
-#include <stdarg.h>
-#include <stdint.h>
-#include <iostream>
+#include "uint_t.hpp"
 
-
-#define DIGIT_SHIFT 30
-#define DIGIT_SUBSECTIONS 3
-#define DIGIT_MASK (((uint64_t)1 << DIGIT_SHIFT) - 1)
-
-#define input_t uint64_t
-#define INPUT_T_SIZE sizeof(uint64_t)
-#define INPUT_T_BITS (INPUT_T_SIZE * 8)
-#define digit_t uint32_t
-#define DIGIT_T_SIZE sizeof(digit_t)
-#define DIGIT_T_BITS (DIGIT_T_SIZE * 8)
-
-
-static_assert(DIGIT_SHIFT < DIGIT_T_BITS, "'DIGIT_SHIFT' must be less than the number of bits in 'DIGIT_T_SIZE'");
-static_assert(INPUT_T_BITS >= DIGIT_T_BITS, "'INPUT_T_BITS' must be greater than or equal to 'DIGIT_T_BITS'");
-
-
-class uint_t
-{
-	public:
-		uint_t(uint64_t initial_value=0);
-		uint_t(uint16_t bits, input_t initial_value1, input_t initial_value2, ...);
-		~uint_t();
-		uint_t(const uint_t& object);
-
-		void resize(int additional_size=1);
-		void size(uint8_t new_size);
-
-		uint_t operator=(uint_t& right);
-
-		uint_t operator+(input_t right);
-		friend uint_t operator+(uint_t& left, uint_t& right);
-		friend uint_t& operator+=(uint_t& left, input_t right);
-		friend uint_t& operator+=(uint_t& left, uint_t& right);
-
-		friend std::ostream& operator<<(std::ostream& stream, uint_t& value);
-
-	private:
-		digit_t* _digits;
-		uint8_t _size = 1;  // number of digits
-};
 
 
 // —————————————————————————————————————————————————— CONSTRUCTORS —————————————————————————————————————————————————— //
+// —————————————————————————————————————————————————————————————————————————————————————————————————————————————————— //
 
 uint_t::uint_t(input_t initial_value/*=0*/)
 {
@@ -58,7 +16,6 @@ uint_t::uint_t(input_t initial_value/*=0*/)
 			_size = x+1;
 		}
 	}
-	std::cout << "uint_t::uint_t(input_t initial_value/*=0*/)::_size: " << (int)_size << "\n";
 
 	_digits = new digit_t[_size];
 	for(uint8_t x = 0; x < _size; x++)
@@ -103,6 +60,8 @@ uint_t::uint_t(uint16_t count, input_t initial_value1, input_t initial_value2, .
 
 		bits_read += number_of_bits_to_read;
 	}
+
+	trim();
 }
 
 
@@ -120,7 +79,8 @@ SUMMARY: Copy Constructor.
 }
 
 
-// ——————————————————————————————————————————————————— OPERATORS  ——————————————————————————————————————————————————— //
+// ————————————————————————————————————————————————————— SIZING ————————————————————————————————————————————————————— //
+// —————————————————————————————————————————————————————————————————————————————————————————————————————————————————— //
 
 void uint_t::resize(int additional_size/*=1*/)
 {
@@ -152,7 +112,23 @@ void uint_t::size(uint8_t new_size)
 }
 
 
+void uint_t::trim()
+{
+	uint8_t leading_zeros;
+	for(leading_zeros = 0; leading_zeros < _size-1; leading_zeros++)
+	{
+		if(_digits[_size - leading_zeros - 1] != 0)
+		{
+			break;
+		}
+	}
+
+	resize(-(int)leading_zeros);
+}
+
+
 // ——————————————————————————————————————————————————— OPERATORS  ——————————————————————————————————————————————————— //
+// —————————————————————————————————————————————————————————————————————————————————————————————————————————————————— //
 
 uint_t uint_t::operator=(uint_t& right)
 {
@@ -168,89 +144,6 @@ uint_t uint_t::operator=(uint_t& right)
 	}
 
 	return *this;
-}
-
-
-uint_t uint_t::operator+(input_t right)
-{
-	uint_t right_uint_t(right);
-	return *this + right_uint_t;
-}
-
-
-uint_t operator+(uint_t& left, uint_t& right)
-{
-	uint_t& a = left._size > right._size ? left : right;
-	uint_t& b = left._size > right._size ? right : left;
-
-	uint_t result;
-	result.size(a._size);
-	digit_t carry = 0;
-
-	uint8_t x;
-	for(x = 0; x < b._size; x++)
-	{
-		carry += a._digits[x] + b._digits[x];
-		result._digits[x] = carry & DIGIT_MASK;
-		carry = carry >> DIGIT_SHIFT;
-	}
-	for(; x < a._size; x++)
-	{
-		carry += a._digits[x];
-		result._digits[x] = carry & DIGIT_MASK;
-		carry = carry >> DIGIT_SHIFT;
-	}
-
-	if(carry != 0)
-	{
-		result.resize(1);
-		result._digits[x] = carry;
-	}
-
-	return result;
-}
-
-
-uint_t& operator+=(uint_t& left, input_t right)
-{
-	uint_t right_uint_t(right);
-	return left += right_uint_t;
-}
-
-
-uint_t& operator+=(uint_t& left, uint_t& right)
-{
-	uint_t& a = left._size > right._size ? left : right;
-	uint_t& b = left._size > right._size ? right : left;
-
-	digit_t* temp = new digit_t[a._size]();
-	digit_t carry = 0;
-
-	uint8_t x;
-	for(x = 0; x < b._size; x++)
-	{
-		carry += a._digits[x] + b._digits[x];
-		temp[x] = carry & DIGIT_MASK;
-		carry = carry >> DIGIT_SHIFT;
-	}
-	for(; x < a._size; x++)
-	{
-		carry += a._digits[x];
-		temp[x] = carry & DIGIT_MASK;
-		carry = carry >> DIGIT_SHIFT;
-	}
-
-	delete[] left._digits;
-	left._size = a._size;
-	left._digits = temp;
-
-	if(carry != 0)
-	{
-		left.resize(1);
-		left._digits[x] = carry;
-	}
-
-	return left;
 }
 
 
@@ -285,38 +178,4 @@ std::ostream& operator<<(std::ostream& stream, uint_t& value)
 uint_t::~uint_t()
 {
 	delete[] _digits;
-}
-
-
-int main()
-{
-	// uint_t + uint_t
-	uint_t a(0b111111111111111111111111111111);
-	std::cout << "a: " << a;
-	uint_t b(1);
-	std::cout << "b: " << b;
-	uint_t c = a + b;
-	std::cout << "a: " << a;
-	std::cout << "c: " << c;
-
-	// uint_t + uint64_t
-	uint_t d = c + 16;
-	std::cout << "d: " << d;
-
-	// uint_t += uint_t
-	uint_t e(0b1111111111111111111111111111111111111111111111111111111111111111);
-	std::cout << "e: " << e;
-	e += b;
-	std::cout << "e: " << e;
-
-	uint_t f(0b1111111111111111111111111111111);
-	std::cout << "f: " << f;
-	f = b;
-	std::cout << "f: " << f;
-
-	// uint_t += uint64_t
-	e += 0b1111111111111111111111111111111111111111111111111111111111111111;
-	std::cout << "e: " << e;
-
-	return 0;
 }
