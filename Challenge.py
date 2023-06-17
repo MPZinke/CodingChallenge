@@ -11,7 +11,7 @@ __author__ = "MPZinke"
 #       - Index: The index at which a permutation is found in lexigraphical order.                                     #
 #       - Order: The order of a card in the lexigraphical order.                                                       #
 #       - Rank: The order of a card within a suit.                                                                     #
-#       - Suit: The order of a card based on the four, (♣, ♦, ♥, ♠)                                                    #
+#       - Suit: The order of a card based on the four, (C, D, H, S)                                                    #
 #       - Permutation: The specific ordering of cards' orders.                                                         #
 #       - Message: The base27 string that James Bond reads.                                                            #
 #                                                                                                                      #
@@ -19,7 +19,7 @@ __author__ = "MPZinke"
 
 
 # Playing Cards
-SUITS = "♣♦♥♠"
+SUITS = "CDHS"
 RANKS = "A23456789TJQK"
 
 DECK_SIZE = len(SUITS) * len(RANKS)
@@ -128,8 +128,10 @@ def encode(message: str) -> list[str]:
 	return cards
 
 
+# ——————————————————————————————————————————————————————— MAIN ——————————————————————————————————————————————————————— #
+
 def main():
-	cards_input = ['K♣', '7♣', '3♣', 'T♦', '2♣', '9♥', '4♦', 'Q♠', '8♥', 'A♥', 'K♥', '8♠', 'T♠', '4♠', '2♠', '5♦', '9♦', '4♥', '5♥', 'A♣', '7♠', 'J♦', '5♣', '2♥', 'Q♣', 'T♥', 'J♠', '6♠', '6♣', '6♦', 'Q♥', '6♥', '9♠', '3♦', '5♠', '7♥', '2♦', '8♦', 'K♦', 'A♠', '4♣', '3♥', 'A♦', 'J♥', '8♣', 'K♠', 'J♣', '9♣', 'T♣', '3♠', '7♦', 'Q♦']
+	cards_input = ['KC', '7C', '3C', 'TD', '2C', '9H', '4D', 'QS', '8H', 'AH', 'KH', '8S', 'TS', '4S', '2S', '5D', '9D', '4H', '5H', 'AC', '7S', 'JD', '5C', '2H', 'QC', 'TH', 'JS', '6S', '6C', '6D', 'QH', '6H', '9S', '3D', '5S', '7H', '2D', '8D', 'KD', 'AS', '4C', '3H', 'AD', 'JH', '8C', 'KS', 'JC', '9C', 'TC', '3S', '7D', 'QD']
 	message = decode(cards_input)
 	print(message)
 	cards_output = encode(message)
