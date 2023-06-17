@@ -33,10 +33,12 @@ class uint_t
 		void size(uint8_t new_size);
 
 		uint_t operator=(uint_t& right);
+
 		uint_t operator+(input_t right);
-		uint_t operator+=(input_t right);
 		friend uint_t operator+(uint_t& left, uint_t& right);
+		friend uint_t& operator+=(uint_t& left, input_t right);
 		friend uint_t& operator+=(uint_t& left, uint_t& right);
+
 		friend std::ostream& operator<<(std::ostream& stream, uint_t& value);
 
 	private:
@@ -49,13 +51,14 @@ class uint_t
 
 uint_t::uint_t(input_t initial_value/*=0*/)
 {
-	for(uint8_t x = 1; x < (INPUT_T_BITS + DIGIT_SHIFT - 1) / DIGIT_SHIFT; x++)
+	for(uint8_t x = 1/* 1 because default to 1 already set */; x < (INPUT_T_BITS + DIGIT_SHIFT - 1) / DIGIT_SHIFT; x++)
 	{
-		if((initial_value >> DIGIT_SHIFT) != 0)
+		if((initial_value >> (DIGIT_SHIFT * x)) != 0)
 		{
-			_size = x;
+			_size = x+1;
 		}
 	}
+	std::cout << "uint_t::uint_t(input_t initial_value/*=0*/)::_size: " << (int)_size << "\n";
 
 	_digits = new digit_t[_size];
 	for(uint8_t x = 0; x < _size; x++)
@@ -171,7 +174,7 @@ uint_t uint_t::operator=(uint_t& right)
 uint_t uint_t::operator+(input_t right)
 {
 	uint_t right_uint_t(right);
-	return *this += right_uint_t;
+	return *this + right_uint_t;
 }
 
 
@@ -182,7 +185,7 @@ uint_t operator+(uint_t& left, uint_t& right)
 
 	uint_t result;
 	result.size(a._size);
-	uint64_t carry = 0;
+	digit_t carry = 0;
 
 	uint8_t x;
 	for(x = 0; x < b._size; x++)
@@ -220,9 +223,8 @@ uint_t& operator+=(uint_t& left, uint_t& right)
 	uint_t& a = left._size > right._size ? left : right;
 	uint_t& b = left._size > right._size ? right : left;
 
-
 	digit_t* temp = new digit_t[a._size]();
-	uint64_t carry = 0;
+	digit_t carry = 0;
 
 	uint8_t x;
 	for(x = 0; x < b._size; x++)
@@ -239,6 +241,7 @@ uint_t& operator+=(uint_t& left, uint_t& right)
 	}
 
 	delete[] left._digits;
+	left._size = a._size;
 	left._digits = temp;
 
 	if(carry != 0)
@@ -306,12 +309,14 @@ int main()
 	e += b;
 	std::cout << "e: " << e;
 
-	e = b;
-	std::cout << "e: " << e;
+	uint_t f(0b1111111111111111111111111111111);
+	std::cout << "f: " << f;
+	f = b;
+	std::cout << "f: " << f;
 
 	// uint_t += uint64_t
-	// uint_t() + uint_t 
-	// uint_t() + uint_t() 
+	e += 0b1111111111111111111111111111111111111111111111111111111111111111;
+	std::cout << "e: " << e;
 
 	return 0;
 }
