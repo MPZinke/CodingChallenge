@@ -105,15 +105,27 @@ FROM: https://github.com/python/cpython/blob/d32e8d6070057eb7ad0eb2f9d9f1efab38b
 int main()
 {
 	uint12_t a = new_uint12_t(63, 0);
-	uint12_t b = new_uint12_t(1, 0);
-
-	uint12_t result = abs_mul(a, b);
-
 	print(a);
 	printf("\n");
+
+	uint12_t b = new_uint12_t(1, 0);
 	print(b);
 	printf("\n");
 
+	uint12_t result = abs_mul(a, b);
 	print(result);
+	printf("\n");
+
+
+	uint12_t a2 = new_uint12_t(30, 0);
+	print(a2);
+	printf("\n");
+
+	uint12_t b2 = new_uint12_t(2, 0);
+	print(b2);
+	printf("\n");
+
+	uint12_t result2 = abs_mul(a2, b2);
+	print(result2);
 	printf("\n");
 }

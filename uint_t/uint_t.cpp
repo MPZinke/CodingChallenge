@@ -95,6 +95,23 @@ void uint_t::swap_digits(digit_t* new_digits, size_t new_digits_size)
 // ————————————————————————————————————————————————————— SIZING ————————————————————————————————————————————————————— //
 // —————————————————————————————————————————————————————————————————————————————————————————————————————————————————— //
 
+uint64_t uint_t::most_significant_bit()
+{
+	for(uint64_t bit_index = _size * DIGIT_SHIFT; bit_index > 0; bit_index--)
+	{
+		size_t digit_index = bit_index / DIGIT_SHIFT;
+		size_t current_bit_index = bit_index % DIGIT_SHIFT;  // min:255; size_t ok: digits can't have more than 64 bits
+
+		if((_digits[digit_index] >> current_bit_index) != 0)
+		{
+			return bit_index;
+		}
+	}
+
+	return 0;
+}
+
+
 void uint_t::resize(int additional_size/*=1*/)
 {
 	assert((int)_size + additional_size <= sizeof(size_t) * 8);  // Ensure we don't overflow _size

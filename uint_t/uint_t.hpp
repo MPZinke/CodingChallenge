@@ -37,6 +37,7 @@ class uint_t
 		void swap_digits(digit_t* new_digits, size_t new_digits_size);
 		// ——————————————————— SIZING ——————————————————— //
 		// —————————————————————————————————————————————— //
+		uint64_t most_significant_bit();
 		void resize(int additional_size=1);
 		void size(size_t new_size);
 		void trim();
