@@ -5,17 +5,15 @@
 
 int main()
 {
-	uint_t a(2, 0b11111111, 0b111);
+	// uint_t a(0b1000000000000000000000000000000000000000000000000000000000000000);
+	uint_t a(4);
 	std::cout << a;
 
-	uint_t b(2, 0b111, 0b111);
+	uint_t b(4);
 	std::cout << b;
 
-	uint_t c = a - b;
-	// uint_t a(4, 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF);
+	uint_t c = a * b;
 	std::cout << c;
-	uint_t d(3, 0, 0, 0);
-	std::cout << d;
 
 	return 0;
 }
