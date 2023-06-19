@@ -8,5 +8,5 @@ def encode(_):
 def decode(_):
  a,b,c=[B.index(a[0])+13*C.index(a[1])for a in _],0,""
  for x,d in enumerate(a):b+=sum(1 for y in E(x+1,52)if a[y]<d)*D(51-x)
- while b:c+=A[b%27];b//=27
- return c[::-1]
+ while b:c=A[b%27]+c;b//=27
+ return c

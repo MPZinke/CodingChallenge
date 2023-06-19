@@ -30,7 +30,7 @@ def main():
 	]:
 		function = ReducedChallenge.decode if(isinstance(test, list)) else ReducedChallenge.encode
 		function_inverse = ReducedChallenge.decode if(not isinstance(test, list)) else ReducedChallenge.encode
-		print(x)
+		print(f"—————————————— TEST {x} ——————————————")
 		x+=1
 		print(test)
 		print(solution)
