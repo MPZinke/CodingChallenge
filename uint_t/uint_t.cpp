@@ -154,7 +154,10 @@ Leaves at least 1 digit
 		}
 	}
 
-	resize(-(int)leading_zeros);
+	if(leading_zeros != 0)
+	{
+		resize(-(int)leading_zeros);
+	}
 }
 
 

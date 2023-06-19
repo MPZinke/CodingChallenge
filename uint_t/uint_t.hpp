@@ -64,6 +64,23 @@ class uint_t
 		friend uint_t operator*(uint_t& left, uint_t& right);
 		friend uint_t& operator*=(uint_t& left, input_t right);
 		friend uint_t& operator*=(uint_t& left, uint_t& right);
+		// —————————————————— DIVISION —————————————————— //
+		uint_t operator/(input_t right);
+		friend uint_t operator/(uint_t& left, uint_t& right);
+		friend uint_t& operator/=(uint_t& left, input_t right);
+		friend uint_t& operator/=(uint_t& left, uint_t& right);
+		// —————————————————— MODULUS  —————————————————— //
+		uint_t operator%(input_t right);
+		friend uint_t operator%(uint_t& left, uint_t& right);
+		friend uint_t& operator%=(uint_t& left, input_t right);
+		friend uint_t& operator%=(uint_t& left, uint_t& right);
+		// —————————————————— BOOLEAN  —————————————————— //
+		bool operator>(input_t right);
+		bool operator>(uint_t& right);
+		bool operator<(input_t right);
+		bool operator<(uint_t& right);
+		bool operator==(uint_t& right);
+		bool operator==(input_t right);
 
 		friend std::ostream& operator<<(std::ostream& stream, uint_t& value);
 
