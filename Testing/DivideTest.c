@@ -1,5 +1,6 @@
 
 
+#include <assert.h>
 #include <stdio.h>
 #include <stdint.h>
 
@@ -89,8 +90,8 @@ PROTOTYPE: `static digit v_lshift(digit *z, digit *a, Py_ssize_t m, int d)`
 	assert(0 <= d && d < DIGIT_SHIFT);
 	for(x = 0; x < DIGIT_COUNT; x++)
 	{
-		double_digit acc = (double_digit)a[i] << d | carry;
-        b[i] = (digit)acc & DIGIT_MASK;
+		double_digit acc = (double_digit)a[x] << d | carry;
+        b[x] = (digit)acc & DIGIT_MASK;
         carry = (digit)(acc >> DIGIT_SHIFT);
     }
 
@@ -118,7 +119,7 @@ FROM: https://github.com/python/cpython/blob/d32e8d6070057eb7ad0eb2f9d9f1efab38b
     }
 
 	uint12_t denominator_copy = new_uint12_t_equaling_0();
-	uint24_t numerator_copy = new_uint12_t_equaling_0();
+	uint12_t numerator_copy = new_uint12_t_equaling_0();
 	digit carry;
     carry = vector_left_shift(denominator_copy.digits, denominator.digits, d);
     assert(carry == 0);

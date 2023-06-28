@@ -16,6 +16,7 @@
 #define DIGIT_T_BITS (DIGIT_T_SIZE * 8)
 #define double_digit_t uint64_t
 #define DOUBLE_DIGIT_T_SIZE sizeof(double_digit_t)
+#define INPUT_T_SIZE_TO_DIGIT_T_SIZE ((INPUT_T_BITS + DIGIT_SHIFT - 1) / DIGIT_SHIFT)
 #define size_t uint8_t  // Limits the max number of digits to sizeof(uint8_t)
 
 
@@ -27,7 +28,7 @@ static_assert(INPUT_T_BITS >= DIGIT_T_BITS, "'INPUT_T_BITS' must be greater than
 class uint_t
 {
 	public:
-		uint_t(uint64_t initial_value=0);
+		uint_t(size_t count=1, uint64_t initial_value=0);
 		uint_t(size_t count, input_t initial_value1, input_t initial_value2, ...);
 		~uint_t();
 		uint_t(const uint_t& object);
@@ -50,15 +51,11 @@ class uint_t
 		friend uint_t operator+(uint_t& left, uint_t& right);
 		friend uint_t& operator+=(uint_t& left, input_t right);
 		friend uint_t& operator+=(uint_t& left, uint_t& right);
-		friend digit_t add(uint_t& a, uint_t& b, digit_t* result_digits);
 		// ———————————————— SUBTRACTION  ———————————————— //
 		uint_t operator-(input_t right);
 		friend uint_t operator-(uint_t& left, uint_t& right);
 		friend uint_t& operator-=(uint_t& left, input_t right);
 		friend uint_t& operator-=(uint_t& left, uint_t& right);
-		friend void subtract(digit_t* left_digits, size_t left_size, digit_t* right_digits, size_t right_size,
-		  digit_t* result_digits);
-		friend void calculate_subtraction_size(uint_t& left, size_t& left_size, uint_t& right, size_t& right_size);
 		// ——————————————— MULTIPLICATION ——————————————— //
 		uint_t operator*(input_t right);
 		friend uint_t operator*(uint_t& left, uint_t& right);
@@ -77,10 +74,14 @@ class uint_t
 		// —————————————————— BOOLEAN  —————————————————— //
 		bool operator>(input_t right);
 		bool operator>(uint_t& right);
+		bool operator>=(input_t right);
+		bool operator>=(uint_t& right);
 		bool operator<(input_t right);
 		bool operator<(uint_t& right);
-		bool operator==(uint_t& right);
+		bool operator<=(input_t right);
+		bool operator<=(uint_t& right);
 		bool operator==(input_t right);
+		bool operator==(uint_t& right);
 
 		friend std::ostream& operator<<(std::ostream& stream, uint_t& value);
 

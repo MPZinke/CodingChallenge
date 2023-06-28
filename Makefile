@@ -1,7 +1,8 @@
 
 
 all:
-	gcc --std=c11 -g Challenge.c -o Challenge
+	g++ --std=c++17 uint_t/*.cpp -o Uint_tTest
+# 	gcc --std=c11 -g Challenge.c -o Challenge
 
 
 checker:
@@ -14,6 +15,10 @@ multiply:
 
 add:
 	gcc --std=c11 -g Testing/AddTest.c -o AddTest
+
+
+div:
+	gcc --std=c11 -g Testing/DivideTest.c -o DivideTest
 
 
 sub:

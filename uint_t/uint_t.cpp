@@ -7,18 +7,21 @@
 // —————————————————————————————————————————————————— CONSTRUCTORS —————————————————————————————————————————————————— //
 // —————————————————————————————————————————————————————————————————————————————————————————————————————————————————— //
 
-uint_t::uint_t(input_t initial_value/*=0*/)
+uint_t::uint_t(size_t size/*=1*/, input_t initial_value/*=0*/)
 {
-	for(size_t x = 1/* 1 because default to 1 already set */; x < (INPUT_T_BITS + DIGIT_SHIFT - 1) / DIGIT_SHIFT; x++)
+	size_t initial_value_size = 1;
+	for(size_t x = 1/* 1 because default to 1 already set */; x < INPUT_T_SIZE_TO_DIGIT_T_SIZE; x++)
 	{
 		if((initial_value >> (DIGIT_SHIFT * x)) != 0)
 		{
-			_size = x+1;
+			initial_value_size = x+1;
 		}
 	}
 
-	_digits = new digit_t[_size];
-	for(size_t x = 0; x < _size; x++)
+	_size = (size < initial_value_size) ? initial_value_size : size;
+	_digits = new digit_t[_size]();
+
+	for(size_t x = 0; x < initial_value_size; x++)
 	{
 		_digits[x] = (initial_value >> (DIGIT_SHIFT * x)) & DIGIT_MASK;
 	}

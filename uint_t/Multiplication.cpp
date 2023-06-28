@@ -26,8 +26,7 @@ uint_t operator*(uint_t& left, uint_t& right)
 	uint64_t required_bits = left.most_significant_bit()+1 + right.most_significant_bit()+1;
 	size_t required_digits = (required_bits + DIGIT_SHIFT - 1) / DIGIT_SHIFT;
 
-	uint_t sum;  // sum of sub_products
-	sum.size(required_digits);
+	uint_t sum(required_digits);  // sum of sub_products
 
 	digit_t carry = 0;
 	for(uint64_t x = 0; x < required_bits; x++)
@@ -35,8 +34,7 @@ uint_t operator*(uint_t& left, uint_t& right)
 		uint16_t left_digit = x / DIGIT_SHIFT, left_bit = x % DIGIT_SHIFT;  // shouln't have more than 65536 digits
 		digit_t left_bit_value = (left._digits[left_digit] >> left_bit) & 0b1;
 
-		uint_t sub_product;
-		sub_product.size(required_digits);
+		uint_t sub_product(required_digits);
 
 		for(uint64_t y = 0; y < (required_bits - (x > required_bits ? 0 : x)); y++)
 		{
