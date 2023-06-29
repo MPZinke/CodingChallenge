@@ -19,34 +19,28 @@ int bit_length(digit_t digit)
 }
 
 
-digit_t array_left_shift(digit_t* destination, digit_t* source, size_t size, int d)
+digit_t array_left_shift(digit_t* destination, digit_t* source, size_t size, int shift_amount)
 /*
 PROTOTYPE: `static digit v_lshift(digit *z, digit *a, Py_ssize_t m, int d)`
            `z` — Destination
            `a` — Source
            `m` — Array size
-           `d` — bits
+           `d` — shift_amount
 FROM: https://github.com/python/cpython/blob/d32e8d6070057eb7ad0eb2f9d9f1efab38b2cff4/Objects/longobject.c#L1564
 */
 {
-    Py_ssize_t i;
-    digit carry = 0;
+    assert(0 <= shift_amount && shift_amount < DIGIT_SHIFT);
 
-    assert(0 <= d && d < PyLong_SHIFT);
-    for (i=0; i < m; i++) {
-        twodigits acc = (twodigits)a[i] << d | carry;
-        z[i] = (digit)acc & PyLong_MASK;
-        carry = (digit)(acc >> PyLong_SHIFT);
-    }
-    return carry;
-}
-{
-	digit_t carry = 0;
-	for(size_t x = 0; x < size; x++)
+	for(int x = 0; x < size; x++)
 	{
-		double_digit_t 
+		destination[x] |= (source[x] << shift_amount) & MASK;
+		if(x < size-1)
+		{
+			destination[x+1] = source[x] >> (SHIFT - shift_amount);
+		}
 	}
 
+	return (source[size-1] << shift_amount) & MASK;
 }
 
 
