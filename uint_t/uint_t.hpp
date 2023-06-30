@@ -82,7 +82,10 @@ class uint_t
 		bool operator<=(uint_t& right);
 		bool operator==(input_t right);
 		bool operator==(uint_t& right);
+		// ——————————————————— BINARY ——————————————————— //
+		uint_t operator<<(input_t right);
 
+		// ————————————————————— IO ————————————————————— //
 		friend std::ostream& operator<<(std::ostream& stream, uint_t& value);
 
 

@@ -24,7 +24,7 @@ uint_t operator-(uint_t& left, uint_t& right)
 
 		if(left_size == 0)
 		{
-			return result;
+			return uint_t();
 		}
 
 		assert(left._digits[left_size] >= right._digits[left_size]);
