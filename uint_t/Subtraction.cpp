@@ -19,7 +19,7 @@ uint_t operator-(uint_t& left, uint_t& right)
 	uint8_t left_size = left_size, right_size = right_size;
 	if(left_size == right_size)
 	{
-		for(; left_size > 0 && left._digits[left_size-1] == right._digits[left_size-1]; left_size--)
+		for(; left_size > 0 && left[left_size-1] == right[left_size-1]; left_size--)
 		{}
 
 		if(left_size == 0)
@@ -27,7 +27,7 @@ uint_t operator-(uint_t& left, uint_t& right)
 			return uint_t();
 		}
 
-		assert(left._digits[left_size] >= right._digits[left_size]);
+		assert(left[left_size] >= right[left_size]);
 
 		right_size = left_size;
 	}
@@ -38,15 +38,15 @@ uint_t operator-(uint_t& left, uint_t& right)
 	uint8_t x;
 	for(x = 0; x < right_size; x++)
 	{
-		borrow = left._digits[x] - right._digits[x] - borrow;
-		result._digits[x] = borrow & DIGIT_MASK;
+		borrow = left[x] - right[x] - borrow;
+		result[x] = borrow & DIGIT_MASK;
 		borrow = borrow >> DIGIT_SHIFT;
 		borrow = borrow & 1;
 	}
 	for(; x < left_size; x++)
 	{
-		borrow = left._digits[x] - borrow;
-		result._digits[x] = borrow & DIGIT_MASK;
+		borrow = left[x] - borrow;
+		result[x] = borrow & DIGIT_MASK;
 		borrow = borrow >> DIGIT_SHIFT;
 		borrow = borrow & 1;
 	}

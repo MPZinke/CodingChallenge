@@ -8,12 +8,12 @@
 #define DIGIT_SUBSECTIONS 3
 #define DIGIT_MASK (((uint64_t)1 << DIGIT_SHIFT) - 1)
 
-#define input_t uint64_t
-#define INPUT_T_SIZE sizeof(uint64_t)
-#define INPUT_T_BITS (INPUT_T_SIZE * 8)
-#define digit_t uint32_t
-#define DIGIT_T_SIZE sizeof(digit_t)
-#define DIGIT_T_BITS (DIGIT_T_SIZE * 8)
+#define input_t uint64_t  // The type of the input that can be used as an operand in conjunction with the uint_t
+#define INPUT_T_SIZE sizeof(uint64_t)  // size of input_t in bytes
+#define INPUT_T_BITS (INPUT_T_SIZE * 8)  // size of input_t in bits
+#define digit_t uint32_t  // The type of the digit within a uint_t
+#define DIGIT_T_SIZE sizeof(digit_t)  // size of digit_t in bytes
+#define DIGIT_T_BITS (DIGIT_T_SIZE * 8)  // size of digit_t in bits
 #define double_digit_t uint64_t
 #define DOUBLE_DIGIT_T_SIZE sizeof(double_digit_t)
 #define INPUT_T_SIZE_TO_DIGIT_T_SIZE ((INPUT_T_BITS + DIGIT_SHIFT - 1) / DIGIT_SHIFT)
@@ -23,6 +23,7 @@
 static_assert(DOUBLE_DIGIT_T_SIZE >= (DIGIT_T_SIZE * 2), "'double_digit_t' must be at least double the size of 'digit_t'");
 static_assert(DIGIT_SHIFT < DIGIT_T_BITS, "'DIGIT_SHIFT' must be less than the number of bits in 'DIGIT_T_SIZE'");
 static_assert(INPUT_T_BITS >= DIGIT_T_BITS, "'INPUT_T_BITS' must be greater than or equal to 'DIGIT_T_BITS'");
+static_assert(sizeof(size_t) <= sizeof(int) / 2, "sizeof(size_t) must be at least half of sizeof(int)");
 
 
 class uint_t
@@ -46,6 +47,8 @@ class uint_t
 		// ————————————————— OPERATORS —————————————————— //
 		// —————————————————————————————————————————————— //
 		uint_t operator=(uint_t& right);
+		digit_t operator[](int index) const;  // Getter
+		digit_t& operator[](int index);  // Setter
 		// —————————————————— ADDITION —————————————————— //
 		uint_t operator+(input_t right);
 		friend uint_t operator+(uint_t& left, uint_t& right);
@@ -92,4 +95,6 @@ class uint_t
 	private:
 		digit_t* _digits;
 		size_t _size = 1;  // number of digits
+		uint_t divide_by_digit(digit_t denominator);
+		uint_t divide_by_uint_t(uint_t& denominator);
 };

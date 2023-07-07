@@ -180,6 +180,36 @@ uint_t uint_t::operator=(uint_t& right)
 }
 
 
+digit_t uint_t::operator[](int index) const  // Getter
+{
+	if(index >= _size || (index < 0 && -index > _size))
+	{
+		exit(1);
+	}
+	if(index < 0)
+	{
+		index = _size + index;
+	}
+
+	return _digits[index];
+}
+
+
+digit_t& uint_t::operator[](int index)  // Setter
+{
+	if(index >= _size || (index < 0 && -index > _size))
+	{
+		exit(1);
+	}
+	if(index < 0)
+	{
+		index = _size + index;
+	}
+
+	return _digits[index];
+}
+
+
 std::ostream& operator<<(std::ostream& stream, uint_t& value)
 {
 	// char* base10_digits = new char[value._bits / 3];

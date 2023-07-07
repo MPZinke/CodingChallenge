@@ -32,7 +32,7 @@ uint_t operator*(uint_t& left, uint_t& right)
 	for(uint64_t x = 0; x < required_bits; x++)
 	{
 		uint16_t left_digit = x / DIGIT_SHIFT, left_bit = x % DIGIT_SHIFT;  // shouln't have more than 65536 digits
-		digit_t left_bit_value = (left._digits[left_digit] >> left_bit) & 0b1;
+		digit_t left_bit_value = (left[left_digit] >> left_bit) & 0b1;
 
 		uint_t sub_product(required_digits);
 
@@ -40,13 +40,13 @@ uint_t operator*(uint_t& left, uint_t& right)
 		{
 			uint16_t right_digit = y / DIGIT_SHIFT, right_bit = y % DIGIT_SHIFT;  // shouldn't have more than 65536 digits
 
-			digit_t right_bit_value = (right._digits[right_digit] >> right_bit) & 0b1;
+			digit_t right_bit_value = (right[right_digit] >> right_bit) & 0b1;
 			digit_t sub_product_bit_value = left_bit_value & right_bit_value ^ carry;
 			carry = ((left_bit_value & right_bit_value + carry) & 0b10) >> 1;
 
 			uint64_t iteration = x + y;
 			double_digit_t sub_product_digit = iteration / DIGIT_SHIFT, sub_product_bit = iteration % DIGIT_SHIFT;
-			sub_product._digits[sub_product_digit] |= (sub_product_bit_value << sub_product_bit) & DIGIT_MASK;
+			sub_product[sub_product_digit] |= (sub_product_bit_value << sub_product_bit) & DIGIT_MASK;
 		}
 
 		sum += sub_product;

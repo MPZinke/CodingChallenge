@@ -23,21 +23,21 @@ uint_t operator+(uint_t& left, uint_t& right)
 	size_t x;
 	for(x = 0; x < b._size; x++)
 	{
-		carry += a._digits[x] + b._digits[x];
-		result._digits[x] = carry & DIGIT_MASK;
+		carry += a[x] + b[x];
+		result[x] = carry & DIGIT_MASK;
 		carry = carry >> DIGIT_SHIFT;
 	}
 	for(; x < a._size; x++)
 	{
-		carry += a._digits[x];
-		result._digits[x] = carry & DIGIT_MASK;
+		carry += a[x];
+		result[x] = carry & DIGIT_MASK;
 		carry = carry >> DIGIT_SHIFT;
 	}
 
 	if(carry != 0)
 	{
 		result.resize(1);
-		result._digits[a._size] = carry;
+		result[a._size] = carry;
 	}
 
 	return result;

@@ -14,7 +14,7 @@ bool uint_t::operator>(uint_t& right)
 {
 	if(_size == right._size)
 	{
-		return _digits[_size-1] > right._digits[_size-1];
+		return _digits[_size-1] > right[_size-1];
 	}
 
 	return _size > right._size;
@@ -52,7 +52,7 @@ bool uint_t::operator<(uint_t& right)
 {
 	if(_size == right._size)
 	{
-		return _digits[_size-1] < right._digits[_size-1];
+		return _digits[_size-1] < right[_size-1];
 	}
 
 	return _size < right._size;
@@ -90,7 +90,7 @@ bool uint_t::operator==(uint_t& right)
 {
 	if(_size == right._size)
 	{
-		return _digits[_size-1] == right._digits[_size-1];
+		return _digits[_size-1] == right[_size-1];
 	}
 
 	return _size == right._size;

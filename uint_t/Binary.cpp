@@ -34,11 +34,11 @@ FROM: https://github.com/python/cpython/blob/d32e8d6070057eb7ad0eb2f9d9f1efab38b
 	for(size_t x = 0; x < iterations; x++)
 	{
 		// Move the bits that stay right
-		shifted._digits[x+digit_shift] |= (this->_digits[x] << right_bits_shift) & DIGIT_MASK;
-		shifted._digits[x+digit_shift+1] = this->_digits[x] >> left_bits_shift;
+		shifted[x+digit_shift] |= (this->_digits[x] << right_bits_shift) & DIGIT_MASK;
+		shifted[x+digit_shift+1] = this->_digits[x] >> left_bits_shift;
 	}
 
-	shifted._digits[iterations+digit_shift] |= (this->_digits[iterations] << right_bits_shift) & DIGIT_MASK;
+	shifted[iterations+digit_shift] |= (this->_digits[iterations] << right_bits_shift) & DIGIT_MASK;
 
 	return shifted;
 }
