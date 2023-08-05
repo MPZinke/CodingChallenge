@@ -3,22 +3,6 @@
 #include "uint_t.hpp"
 
 
-int bit_length(digit_t digit)
-{
-	static_assert(DIGIT_SHIFT <= sizeof(unsigned long) * 8, "digit is larger than unsigned long");
-	int d;
-	// FROM: https://github.com/python/cpython/blob/d32e8d6070057eb7ad0eb2f9d9f1efab38b2cff4/Objects/longobject.c#L2981
-	// PyLong_SHIFT - bit_length_digit(w1->long_value.ob_digit[size_w-1])
-	if(digit == 0)
-	{
-		return DIGIT_SHIFT;
-	}
-
-	// __builtin_clzl() is available since GCC 3.4.
-	return (int)sizeof(unsigned long) * 8 - __builtin_clzl(digit);
-}
-
-
 uint_t uint_t::divide_by_digit(digit_t denominator)
 /*
 FROM: https://github.com/python/cpython/blob/d32e8d6070057eb7ad0eb2f9d9f1efab38b2cff4/Objects/longobject.c#L2861
@@ -60,7 +44,7 @@ PROTOTYPE: `static PyLongObject* x_divrem(PyLongObject *v1, PyLongObject *w1, Py
            `w1` — Denominator
 */
 {
-	int shift_amount = DIGIT_SHIFT - bit_length(denominator[-1]);  // `d`
+	int shift_amount = DIGIT_SHIFT - needed_bits(denominator[-1]);  // `d`
 	uint_t denominator_shift = denominator << shift_amount;  // `w`
 	uint_t numerator_shift = (*this) << shift_amount;  // `v`
 
@@ -94,6 +78,15 @@ PROTOTYPE: `static PyLongObject* x_divrem(PyLongObject *v1, PyLongObject *w1, Py
 		double_digit_top_numerator |= numerator_digits[denominator_shift._size-1];
 
 		digit_t quotient = (digit_t)(double_digit_top_numerator / denominator_shift[-1]);
+		digit_t remainder = (digit_t)(double_digit_top_numerator % denominator_shift[-1]);
+
+		for(uint64_t x = 0; x < 0xFFFFFFFFFFFFFFFF; x++)
+		{
+
+			if(!(double_digit_t)denominator_shift[-2] * quotient >
+			     (((double_digit_t)remainder << DIGIT_SHIFT) | [denominator_shift._size-2])
+			   )
+		}
 	}
 }
 

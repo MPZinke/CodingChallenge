@@ -4,18 +4,34 @@
 
 
 
+int highest_bit(digit_t digit)
+/*
+Gets the highest bit index by using __builtin_clzl and this gets the opposite.
+__builtin_clzl: Gets the leading zeros.
+*/
+{
+	// FROM: https://github.com/python/cpython/blob/d32e8d6070057eb7ad0eb2f9d9f1efab38b2cff4/Objects/longobject.c#L2981
+	// PyLong_SHIFT - bit_length_digit(w1->long_value.ob_digit[size_w-1])
+	if(digit == 0)
+	{
+		return DIGIT_SHIFT;
+	}
+
+	// __builtin_clzl() is available since GCC 3.4.
+	return (int)DIGIT_T_BITS - __builtin_clzl(digit);
+}
+
+
 // —————————————————————————————————————————————————— CONSTRUCTORS —————————————————————————————————————————————————— //
 // —————————————————————————————————————————————————————————————————————————————————————————————————————————————————— //
 
 uint_t::uint_t(size_t size/*=1*/, input_t initial_value/*=0*/)
 {
-	size_t initial_value_size = 1;
-	for(size_t x = 1/* 1 because default to 1 already set */; x < INPUT_T_SIZE_TO_DIGIT_T_SIZE; x++)
+	// `INPUT_T_BITS - __builtin_clzl(initial_value)` is the highest bit for input_t input.
+	size_t initial_value_size = (INPUT_T_BITS - __builtin_clzl(initial_value) + DIGIT_SHIFT - 1) / DIGIT_SHIFT;
+	if(initial_value_size == 0)
 	{
-		if((initial_value >> (DIGIT_SHIFT * x)) != 0)
-		{
-			initial_value_size = x+1;
-		}
+		initial_value_size = 1;
 	}
 
 	_size = (size < initial_value_size) ? initial_value_size : size;

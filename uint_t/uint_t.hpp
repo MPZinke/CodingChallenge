@@ -26,6 +26,9 @@ static_assert(INPUT_T_BITS >= DIGIT_T_BITS, "'INPUT_T_BITS' must be greater than
 static_assert(sizeof(size_t) <= sizeof(int) / 2, "sizeof(size_t) must be at least half of sizeof(int)");
 
 
+int highest_bit(digit_t digit);
+
+
 class uint_t
 {
 	public:
